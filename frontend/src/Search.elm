@@ -34,7 +34,7 @@ module Search exposing
 import Base64
 import Browser.Dom
 import Browser.Navigation
-import Html
+import Html.Styled
     exposing
         ( Html
         , a
@@ -52,12 +52,13 @@ import Html
         , text
         , ul
         )
-import Html.Attributes
+import Html.Styled.Attributes
     exposing
         ( attribute
         , autofocus
         , class
         , classList
+        , css
         , disabled
         , href
         , id
@@ -65,7 +66,7 @@ import Html.Attributes
         , type_
         , value
         )
-import Html.Events
+import Html.Styled.Events
     exposing
         ( onClick
         , onInput
@@ -84,6 +85,7 @@ import Route
         )
 import Route.SearchQuery
 import Set
+import Style exposing (loading)
 import Task
 
 
@@ -358,9 +360,9 @@ ensureLoading nixosChannels model =
         model
 
 
-elementId : String -> Html.Attribute msg
+elementId : String -> Html.Styled.Attribute msg
 elementId str =
-    Html.Attributes.id <| "result-" ++ str
+    Html.Styled.Attributes.id <| "result-" ++ str
 
 
 
@@ -751,19 +753,15 @@ viewFlakes :
     -> SearchType
     -> List (Html msg)
 viewFlakes outMsg _ selectedCategory =
-    [ li []
-        [ ul []
+    [ li [ css [ Style.bucket.container ] ]
+        [ ul [ css [ Style.bucket.list ] ]
             (List.map
                 (\category ->
-                    li []
+                    li [ css [ Style.bucket.listItem ] ]
                         [ a
                             [ href "#"
                             , onClick <| outMsg (SubjectChange category)
-                            , classList
-                                [ ( "selected"
-                                  , category == selectedCategory
-                                  )
-                                ]
+                            , css [ Style.bucket.item, Style.bucket.selected (category == selectedCategory) ]
                             ]
                             [ span [] [ text <| searchTypeToTitle category ]
                             , closeButton
@@ -803,10 +801,10 @@ viewResult nixosChannels outMsg toRoute categoryName model viewSuccess viewBucke
             div [] []
 
         RemoteData.Loading ->
-            div [ class "loader-wrapper" ]
-                [ ul [ class "search-sidebar" ] searchBuckets
-                , div [ class "loader" ] [ text "Loading..." ]
-                , h2 [] [ text "Searching..." ]
+            div [ css [ Style.loading.wrapper ] ]
+                [ ul [ css [ Style.layout.sidebar ] ] searchBuckets
+                , div [ css [ Style.loading.loader ] ] [ text "Loading..." ]
+                , h2 [ css [ Style.loading.headline ] ] [ text "Searching..." ]
                 ]
 
         RemoteData.Success result ->
@@ -816,20 +814,20 @@ viewResult nixosChannels outMsg toRoute categoryName model viewSuccess viewBucke
             in
             if result.hits.total.value == 0 && List.length buckets == 0 then
                 div [ class "search-results" ]
-                    [ ul [ class "search-sidebar" ] searchBuckets
+                    [ ul [ css [ Style.layout.sidebar ] ] searchBuckets
                     , viewNoResults categoryName
                     ]
 
             else if List.length buckets > 0 then
                 div [ class "search-results" ]
-                    [ ul [ class "search-sidebar" ] <| List.append searchBuckets buckets
+                    [ ul [ css [ Style.layout.sidebar ] ] <| List.append searchBuckets buckets
                     , div []
                         (viewResults nixosChannels model result viewSuccess toRoute outMsg categoryName)
                     ]
 
             else
                 div [ class "search-results" ]
-                    [ ul [ class "search-sidebar" ] searchBuckets
+                    [ ul [ css [ Style.layout.sidebar ] ] searchBuckets
                     , div []
                         (viewResults nixosChannels model result viewSuccess toRoute outMsg categoryName)
                     ]
@@ -855,7 +853,7 @@ viewResult nixosChannels outMsg toRoute categoryName model viewSuccess viewBucke
             in
             div []
                 [ div [ class "alert alert-error" ]
-                    [ ul [ class "search-sidebar" ] searchBuckets
+                    [ ul [ css [ Style.layout.sidebar ] ] searchBuckets
                     , h4 [] [ text errorTitle ]
                     , text errorMessage
                     ]
@@ -869,7 +867,7 @@ viewNoResults categoryName =
     div [ class "search-no-results" ]
         [ h2 [] [ text <| "No " ++ categoryName ++ " found!" ]
         , text "You might want to "
-        , Html.a [ href "https://nixos.org/manual/nixpkgs/stable/#chap-quick-start" ] [ text "add a package" ]
+        , a [ href "https://nixos.org/manual/nixpkgs/stable/#chap-quick-start" ] [ text "add a package" ]
         , text " or "
         , a [ href "https://github.com/NixOS/nixpkgs/issues/new?assignees=&labels=0.kind%3A+packaging+request&template=packaging_request.md&title=Package+request%3A+PACKAGENAME" ] [ text "make a packaging request" ]
         , text "."
@@ -895,20 +893,19 @@ viewBucket title buckets searchMsgFor selectedBucket sets =
             []
 
          else
-            [ li []
-                [ ul []
+            [ li [ css [ Style.bucket.container ] ]
+                [ ul [ css [ Style.bucket.list ] ]
                     (List.append
-                        [ li [ class "header" ] [ text title ] ]
+                        [ li [ css [ Style.bucket.header ] ] [ text title ] ]
                         (List.map
                             (\bucket ->
-                                li []
+                                li [ css [ Style.bucket.listItem ] ]
                                     [ a
                                         [ href "#"
                                         , onClick <| searchMsgFor bucket.key
-                                        , classList
-                                            [ ( "selected"
-                                              , List.member bucket.key selectedBucket
-                                              )
+                                        , css
+                                            [ Style.bucket.item
+                                            , Style.bucket.selected (List.member bucket.key selectedBucket)
                                             ]
                                         ]
                                         [ span [] [ text bucket.key ]
@@ -1041,7 +1038,7 @@ viewResults nixosChannels model result viewSuccess _ outMsg categoryName =
             String.fromInt result.hits.total.value
     in
     [ div []
-        [ Html.map outMsg <| viewSortSelection model
+        [ Html.Styled.map outMsg <| viewSortSelection model
         , h2 []
             (List.append
                 [ text "Showing results "
@@ -1067,7 +1064,7 @@ viewResults nixosChannels model result viewSuccess _ outMsg categoryName =
             )
         ]
     , viewSuccess nixosChannels model.channel model.showInstallDetails model.show result.hits.hits
-    , Html.map outMsg <| viewPager model result.hits.total.value
+    , Html.Styled.map outMsg <| viewPager model result.hits.total.value
     ]
 
 
@@ -1465,9 +1462,9 @@ showMoreButton toggle isOpen =
 -- Html Event Helpers
 
 
-onClickStop : msg -> Html.Attribute msg
+onClickStop : msg -> Html.Styled.Attribute msg
 onClickStop message =
-    Html.Events.custom "click" <|
+    Html.Styled.Events.custom "click" <|
         Json.Decode.succeed
             { message = message
             , stopPropagation = True
@@ -1475,7 +1472,7 @@ onClickStop message =
             }
 
 
-trapClick : Html.Attribute (Msg a b)
+trapClick : Html.Styled.Attribute (Msg a b)
 trapClick =
-    Html.Events.stopPropagationOn "click" <|
+    Html.Styled.Events.stopPropagationOn "click" <|
         Json.Decode.succeed ( NoOp, True )

@@ -15,7 +15,7 @@ module Page.Options exposing
     )
 
 import Browser.Navigation
-import Html
+import Html.Styled
     exposing
         ( Html
         , a
@@ -28,14 +28,8 @@ import Html
         , text
         , ul
         )
-import Html.Attributes
-    exposing
-        ( class
-        , classList
-        , href
-        , target
-        )
-import Html.Events
+import Html.Styled.Attributes exposing (class, classList, css, href, target)
+import Html.Styled.Events
     exposing
         ( onClick
         )
@@ -49,6 +43,7 @@ import Search
         , NixOSChannel
         , decodeResolvedFlake
         )
+import Style
 import Utils
 
 
@@ -185,15 +180,15 @@ viewResultItem :
 viewResultItem nixosChannels channel _ show item =
     let
         asPre value =
-            pre [] [ text value ]
+            pre [ css [ Style.pre.base ] ] [ text value ]
 
         asPreCode value =
-            div [] [ pre [] [ code [ class "code-block" ] [ text value ] ] ]
+            pre [ css [ Style.pre.base, Style.pre.code ] ] [ text value ]
 
         showDetails =
             if Just item.source.name == show then
                 Just <|
-                    div [ Html.Attributes.map SearchMsg Search.trapClick ] <|
+                    div [ Html.Styled.Attributes.map SearchMsg Search.trapClick ] <|
                         [ div [] [ text "Name" ]
                         , div [] [ asPreCode item.source.name ]
                         ]

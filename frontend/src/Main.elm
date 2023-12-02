@@ -2,22 +2,9 @@ module Main exposing (main)
 
 import Browser
 import Browser.Navigation
-import Html
-    exposing
-        ( Html
-        , a
-        , div
-        , footer
-        , header
-        , img
-        , li
-        , small
-        , span
-        , sup
-        , text
-        , ul
-        )
-import Html.Attributes
+import Html as ElmHtml
+import Html.Styled exposing (Html, a, div, footer, header, img, li, small, span, sup, text, ul)
+import Html.Styled.Attributes
     exposing
         ( alt
         , class
@@ -38,6 +25,7 @@ import Search
         , decodeNixOSChannels
         , defaultFlakeId
         )
+import Style exposing (withStyled)
 import Url
 
 
@@ -339,7 +327,7 @@ view :
     Model
     ->
         { title : String
-        , body : List (Html Msg)
+        , body : List (ElmHtml.Html Msg)
         }
 view model =
     let
@@ -379,44 +367,43 @@ view model =
     in
     { title = title
     , body =
-        [ div []
-            [ header []
-                [ div [ class "navbar navbar-static-top" ]
-                    [ div [ class "navbar-inner" ]
-                        [ div [ class "container" ]
-                            [ a [ class "brand", href "https://nixos.org" ]
-                                [ img [ alt "NixOS logo", src "https://nixos.org/logo/nix-wiki.png", class "logo" ] []
-                                ]
-                            , div []
-                                [ ul [ class "nav pull-left" ]
-                                    (viewNavigation model.route)
-                                ]
+        [ header []
+            [ div [ class "navbar navbar-static-top" ]
+                [ div [ class "navbar-inner" ]
+                    [ div [ class "container" ]
+                        [ a [ class "brand", href "https://nixos.org" ]
+                            [ img [ alt "NixOS logo", src "https://nixos.org/logo/nix-wiki.png", class "logo" ] []
                             ]
-                        ]
-                    ]
-                ]
-            , div [ class "container main" ]
-                [ div [ id "content" ] [ viewPage model ]
-                , footer
-                    [ class "container text-center" ]
-                    [ div []
-                        [ span [] [ text "Please help us improve the search by " ]
-                        , a
-                            [ href "https://github.com/NixOS/nixos-search/issues"
+                        , div []
+                            [ ul [ class "nav pull-left" ]
+                                (viewNavigation model.route)
                             ]
-                            [ text "reporting issues" ]
-                        , span [] [ text "." ]
-                        ]
-                    , div []
-                        [ span [] [ text "❤️  " ]
-                        , span [] [ text "Elasticsearch instance graciously provided by " ]
-                        , a [ href "https://bonsai.io" ] [ text "Bonsai" ]
-                        , span [] [ text ". Thank you! ❤️ " ]
                         ]
                     ]
                 ]
             ]
+        , div [ class "container main" ]
+            [ div [ id "content" ] [ viewPage model ]
+            , footer
+                [ class "container text-center" ]
+                [ div []
+                    [ span [] [ text "Please help us improve the search by " ]
+                    , a
+                        [ href "https://github.com/NixOS/nixos-search/issues"
+                        ]
+                        [ text "reporting issues" ]
+                    , span [] [ text "." ]
+                    ]
+                , div []
+                    [ span [] [ text "❤️  " ]
+                    , span [] [ text "Elasticsearch instance graciously provided by " ]
+                    , a [ href "https://bonsai.io" ] [ text "Bonsai" ]
+                    , span [] [ text ". Thank you! ❤️ " ]
+                    ]
+                ]
+            ]
         ]
+            |> withStyled
     }
 
 
@@ -465,13 +452,13 @@ viewPage model =
             div [] [ text "Not Found" ]
 
         Packages packagesModel ->
-            Html.map (\m -> PackagesMsg m) <| Page.Packages.view model.nixosChannels packagesModel
+            Html.Styled.map (\m -> PackagesMsg m) <| Page.Packages.view model.nixosChannels packagesModel
 
         Options optionsModel ->
-            Html.map (\m -> OptionsMsg m) <| Page.Options.view model.nixosChannels optionsModel
+            Html.Styled.map (\m -> OptionsMsg m) <| Page.Options.view model.nixosChannels optionsModel
 
         Flakes flakesModel ->
-            Html.map (\m -> FlakesMsg m) <| Page.Flakes.view model.nixosChannels flakesModel
+            Html.Styled.map (\m -> FlakesMsg m) <| Page.Flakes.view model.nixosChannels flakesModel
 
 
 
