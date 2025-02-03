@@ -171,3 +171,7 @@ repo = "telescope"
 type = "github"
 owner = "nix-community"
 repo = "autofirma-nix"
+
+[[sources]]
+type = "git"
+url = "git+https://github.com/TamtamHero/fw-fanctrl?ref=packaging/nix"
